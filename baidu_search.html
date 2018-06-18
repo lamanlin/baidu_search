@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jsonp 调用百度搜索查询接口</title>
+    <style type="text/css">
+        div, ul, input, li, a {
+            padding: 0;
+            margin: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-size: 14px;
+            font-family: "\5FAE\8F6F\96C5\9ED1", Helvetica, sans-serif;
+        }
+
+
+        ul, li {
+            list-style: none;
+        }
+
+        .box {
+            margin: 130px auto;
+            width: 430px;
+        }
+
+        .box input {
+            padding: 0 5px;
+            width: 408px;
+            height: 35px;
+            border: 1px solid silver;
+            outline: none;
+        }
+
+        .box ul {
+            border: 1px solid #ccb6c0;
+            border-top: none;
+            width: 410px;
+            background: #fff0f5;
+            box-shadow: 2px 2px 1px #d5d9f7;
+            display: block;
+        }
+
+        .box li {
+            padding: 10px 5px;
+            width: 410px;
+            background: #fff0f5;
+            cursor: pointer;
+        }
+
+        .box li:hover {
+            background: #CCFF66;
+        }
+
+    </style>
+</head>
+<body>
+<div class="box">
+    <input type="text" id="searchIpt">
+    <ul id="searchList">
+       <!-- <li><a href="javascript:;">嘉应学院</a></li>
+        <li><a href="javascript:;">嘉应学院医学院</a></li>
+        <li><a href="javascript:;">嘉应学院本部</a></li>
+        <li><a href="javascript:;">嘉应学院江南</a></li>-->
+    </ul>
+
+</div>
+<script type="text/javascript" charset="UTF-8" src="jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    var $searchIpt = $("#searchIpt"), $searchList = $("#searchList");
+    var searchMod = (function () {
+
+        //把通过百度请求道的数据绑定在列表中
+        function bindHtml() {
+            var keyWords = $searchIpt.val();
+
+            function callback(jsonData) {
+                var data = jsonData["s"];
+                var str = '';
+                $.each(data, function (index, item) {
+                    str += '<li>' + item + '</li>';
+                });
+                $searchList.html(str).stop().slideDown(100);
+            }
+
+            $.ajax({
+                url: "http://suggestion.baidu.com/su?wd=" + keyWords,
+                dataType: "jsonp",
+                jsonp: "cb",
+                success: callback
+            });
+        }
+
+
+        //方法的入口，事件绑定触发
+        function init() {
+            $(document).on("click",function (e) {
+                var tar = e.target;
+                var tarTag = tar.tagName.toLowerCase();
+                $tar = $(tar);
+                if (tar.id === "searchIpt"){
+                    bindHtml();
+                    $searchList.stop().slideDown(100);
+                }
+                if (tarTag === "li" && tar.parentNode.id === "searchList") {
+                    var val = $tar.html();
+                    $searchIpt.val(val);
+                    $searchList.stop().slideUp(100);
+                    return;
+                }
+                if (tar.id === "searchList") {
+                    return;
+                }
+                $searchList.stop().slideUp(100);
+            });
+            $searchIpt.on("focus keyup keydown", function (e) {
+                var val = $(this).val();
+                if (val.length > 0) {
+                    bindHtml();
+                    return;
+                }
+                $searchList.stop().slideUp(100);
+            });
+        }
+
+        return {init: init};
+    })();
+
+    searchMod.init();
+</script>
+</body>
+</html>
